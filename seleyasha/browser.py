@@ -1,9 +1,52 @@
+from selenium.webdriver.remote.webdriver import WebDriver
+from selenium.webdriver.remote.webelement import WebElement
+
+from seleyasha.selector import to_locator
+from seleyasha.wait import WebDriverWait
+
+driver: WebDriver = ...
+wait: WebDriverWait = ...
 
 
-class Browser:
-    def __init__(self):
-        # todo: store driver in self
-        # todo: create wait and store it in self
-        ...
+def assert_(condition):
+    return wait.until(condition)
 
-    # move here all waiting commands like click, type, assert_that
+
+def open(url):
+    driver.get(url)
+
+
+def back():
+    driver.back()
+
+
+def quit():
+    driver.quit()
+
+
+def element(selector):
+    def find_visible(driver: WebDriver):
+        webelement = driver.find_element(*to_locator(selector))
+        if not webelement.is_displayed():
+            raise AssertionError(f'element is not displayed: {webelement.get_attribute("outerHTML")}')
+        return webelement
+
+    return wait.until(find_visible, message=f'element by {selector} is not ready')
+
+
+def type(selector, value):
+    def command(driver: WebDriver) -> WebElement:
+        webelement = driver.find_element(*to_locator(selector))
+        webelement.send_keys(value)
+        return webelement
+
+    return wait.until(command, message=f'failed to type «{value}» into element by {selector}')
+
+
+def click(selector):
+    def command(driver: WebDriver) -> WebElement:
+        webelement = driver.find_element(*to_locator(selector))
+        webelement.click()
+        return webelement
+
+    return wait.until(command, message=f'failed to click on element by {selector}')
