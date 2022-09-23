@@ -1,34 +1,17 @@
-from selenium import webdriver
-from selenium.webdriver import Keys
-from selenium.webdriver.chrome.service import Service as ChromeService
+from tests import web
+from tests.web import browser
 
-from webdriver_manager.chrome import ChromeDriverManager
+browser.open('/')
 
-from seleyasha.browser import Browser
-from seleyasha.conditions import that
-
-browser = Browser(
-    webdriver.Chrome(service=ChromeService(ChromeDriverManager().install()))
-)
-
-browser.open('https://ecosia.org')
-
-query = '[name=q]'
-browser.type(query, value='selene' + Keys.ENTER)
-# 4
-# browser.element('[name=q]').type('selene' + Keys.ENTER)
-# ...
-# query = element('[name=q]')
-# query.type('selene' + Keys.ENTER)
+web.ecosia.query.assert_value('').type('selene').press_enter()
 
 browser.back()
 
-browser.type(query, value=' github issues' + Keys.ENTER)
-# 4
-# query.type(' yashaka' + Keys.ENTER)
+web.ecosia.query.type(' github issues').press_enter()
 
-browser.click('[data-test-id=mainline-result-web]:nth-of-type(1) a')
-
-browser.assert_(that.number_of_elements('[id^=issue_]:not([id$=_link])', value=25))
+web.ecosia.first_result_link.assert_text(
+    'https://github.com › yashaka › selene › issues'
+).click()
+web.github_issues.links.assert_amount(25)
 
 browser.quit()
